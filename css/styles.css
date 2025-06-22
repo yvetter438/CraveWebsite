@@ -18,30 +18,96 @@ main {
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
-    padding: 80px 20px 0;
-    text-align: center;
+    padding: 20px; /* Reduced top padding since no header */
 }
 
-/* Hero section styles (for index.html) */
+/* Hero section styles */
 .hero {
-    height: 100vh;
+    min-height: 100vh;
     width: 100vw;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 20px 100px;
 }
 
 .container {
     width: 100%;
-    height: 100%;
-    background-color: #808080;
+    max-width: 1200px; /* Increased to accommodate side-by-side layout */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-content {
+    display: flex;
+    align-items: center;
+    gap: 60px; /* Space between text and image */
+    width: 100%;
+}
+
+.hero-text {
+    flex: 1;
+    text-align: left;
+}
+
+.hero-title {
+    font-size: 4rem; /* Large, bold title */
+    font-weight: 900;
+    color: #0a7ea4; /* Using your brand color */
+    margin: 0 0 20px 0;
+    line-height: 1.1;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.hero-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-image img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+    .hero-content {
+        flex-direction: column;
+        gap: 40px;
+        text-align: center;
+    }
+    
+    .hero-text {
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 3rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+    }
 }
 
 /* Header styles */
-header {
+/* header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    background-color: #fff; /* or any color you prefer */
+    background-color: #fff;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     z-index: 1000;
 }
@@ -51,7 +117,7 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    max-width: 1200px; /* or any width you prefer */
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -62,8 +128,8 @@ nav ul {
 }
 
 .logo img {
-    height: 40px; /* adjust as needed */
-}
+    height: 40px;
+} */
 
 h1 {
     color: #0a7ea4;
@@ -193,4 +259,41 @@ footer {
     background-color: #0a7ea4;
     color: white;
     text-decoration: none;
+}
+
+/* Features page styles */
+.features-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.features-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.feature-word {
+    font-size: 5rem;
+    font-weight: 900;
+    color: #0a7ea4;
+    margin: 0;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Responsive design for features */
+@media (max-width: 768px) {
+    .feature-word {
+        font-size: 3.5rem;
+    }
+    
+    .features-content {
+        gap: 30px;
+    }
 }
