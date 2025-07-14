@@ -81,6 +81,81 @@ body {
   color: #ffe066;
   font-weight: 500;
 }
+.video-item {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  background: #fff;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+}
+
+.video-item.swiped {
+  transform: translateX(100%);
+}
+
+.swipe-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #e94e77, #ff6b6b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.video-item.swiped .swipe-overlay {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.swipe-content {
+  text-align: center;
+  color: white;
+  padding: 2rem;
+}
+
+.swipe-content h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.swipe-content p {
+  margin: 0 0 1.5rem 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.order-btn {
+  background: white;
+  color: #e94e77;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.order-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+.order-btn:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 600px) {
   .video-feed {
     padding: 0 0.2rem 2rem 0.2rem;
@@ -91,5 +166,12 @@ body {
   }
   .restaurant-header h1 {
     font-size: 1.3rem;
+  }
+  .swipe-content h2 {
+    font-size: 1.5rem;
+  }
+  .order-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
   }
 } 
