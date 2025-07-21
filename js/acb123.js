@@ -166,7 +166,4 @@ window.onload = function() {
   
   // Setup video autoplay
   setupVideoAutoplay();
-  
-  // Setup swipe functionality
-  setupSwipeFunctionality();
 }; 
