@@ -2,6 +2,7 @@
 function setupVideoAutoplay() {
   const videos = document.querySelectorAll('.video-item video');
   let currentlyPlaying = null;
+  let globalMuted = true;
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -29,15 +30,15 @@ function setupVideoAutoplay() {
   // Observe all videos
   videos.forEach(video => {
     observer.observe(video);
-    
-    // Add click to unmute functionality
+    video.muted = globalMuted;
+    video.volume = 0.5;
+    // Add click to toggle global mute
     video.addEventListener('click', () => {
-      if (video.muted) {
-        video.muted = false;
-        video.volume = 0.5;
-      } else {
-        video.muted = true;
-      }
+      globalMuted = !globalMuted;
+      videos.forEach(v => {
+        v.muted = globalMuted;
+        v.volume = 0.5;
+      });
     });
   });
 }
