@@ -25,6 +25,9 @@ body {
   padding: 0 1rem 2rem 1rem;
   max-width: 430px;
   margin: 0 auto;
+  scroll-snap-type: y mandatory;
+  overflow-y: auto;
+  height: 100vh;
 }
 .video-item {
   position: relative;
@@ -32,6 +35,11 @@ body {
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(0,0,0,0.10);
   background: #fff;
+  scroll-snap-align: start;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .video-item video {
   width: 100%;
