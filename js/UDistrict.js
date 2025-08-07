@@ -29,14 +29,17 @@ class VideoPerformanceTracker {
 
 const performanceTracker = new VideoPerformanceTracker();
 
-// Enhanced lazy loading with preloading next 3 videos - Fixed for fast scrolling
+// Mobile-friendly lazy loading with fallbacks
 function setupLazyLoading() {
   const videos = document.querySelectorAll('.video-item video[data-src]');
   const videoArray = Array.from(videos);
   let currentVisibleIndex = 0;
   let loadingStates = new Map(); // Track loading state of each video
+  let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   
-  // Function to load a specific video
+  console.log(`📱 Device detected: ${isMobile ? 'Mobile' : 'Desktop'}`);
+  
+  // Function to load a specific video with mobile optimizations
   function loadVideo(video, index) {
     if (!video.src && video.dataset.src && !loadingStates.get(index)) {
       const startTime = performance.now();
@@ -46,6 +49,16 @@ function setupLazyLoading() {
       loadingStates.set(index, 'loading');
       
       console.log(`🔄 Loading video ${index + 1}: ${videoSrc}`);
+      
+      // Mobile-specific video attributes
+      if (isMobile) {
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+        video.setAttribute('x5-playsinline', '');
+        video.setAttribute('x5-video-player-type', 'h5');
+        video.setAttribute('x5-video-player-fullscreen', 'false');
+        video.setAttribute('preload', 'metadata');
+      }
       
       // Load the video source
       video.src = videoSrc;
@@ -58,27 +71,35 @@ function setupLazyLoading() {
         console.log(`✅ Video ${index + 1} loaded successfully`);
       }, { once: true });
       
-      // Handle load errors
-      video.addEventListener('error', () => {
-        console.error(`❌ Failed to load video ${index + 1}`);
+      // Handle load errors with retry mechanism
+      video.addEventListener('error', (e) => {
+        console.error(`❌ Failed to load video ${index + 1}:`, e);
         loadingStates.set(index, 'error');
+        
+        // Retry loading on mobile after a delay
+        if (isMobile && loadingStates.get(index) === 'error') {
+          setTimeout(() => {
+            console.log(`🔄 Retrying video ${index + 1}...`);
+            loadingStates.set(index, 'retrying');
+            video.src = videoSrc;
+          }, 2000);
+        }
       }, { once: true });
     }
   }
   
-  // Function to preload next 3 videos
+  // Function to preload next videos (reduced for mobile)
   function preloadNextVideos(visibleIndex) {
+    const preloadCount = isMobile ? 2 : 3; // Reduce preload on mobile
     const nextIndices = [];
     
-    // Get next 3 video indices
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= preloadCount; i++) {
       const nextIndex = visibleIndex + i;
       if (nextIndex < videoArray.length) {
         nextIndices.push(nextIndex);
       }
     }
     
-    // Load next 3 videos
     nextIndices.forEach(index => {
       loadVideo(videoArray[index], index);
     });
@@ -88,19 +109,18 @@ function setupLazyLoading() {
     }
   }
   
-  // Function to preload previous 2 videos (for backward scrolling)
+  // Function to preload previous videos (reduced for mobile)
   function preloadPreviousVideos(visibleIndex) {
+    const preloadCount = isMobile ? 1 : 2; // Reduce preload on mobile
     const prevIndices = [];
     
-    // Get previous 2 video indices
-    for (let i = 1; i <= 2; i++) {
+    for (let i = 1; i <= preloadCount; i++) {
       const prevIndex = visibleIndex - i;
       if (prevIndex >= 0) {
         prevIndices.push(prevIndex);
       }
     }
     
-    // Load previous 2 videos
     prevIndices.forEach(index => {
       loadVideo(videoArray[index], index);
     });
@@ -109,6 +129,12 @@ function setupLazyLoading() {
       console.log(`📦 Preloading previous videos: ${prevIndices.map(i => i + 1).join(', ')}`);
     }
   }
+
+  // Enhanced intersection observer with mobile-friendly settings
+  const observerOptions = {
+    rootMargin: isMobile ? '100px 0px' : '150px 0px', // Smaller margin on mobile
+    threshold: isMobile ? 0.05 : 0.1 // Lower threshold on mobile
+  };
 
   const lazyLoadObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -122,29 +148,36 @@ function setupLazyLoading() {
         // Update current visible index
         currentVisibleIndex = videoIndex;
         
-        // Preload next 3 videos
+        // Preload videos
         preloadNextVideos(currentVisibleIndex);
-        
-        // Preload previous 2 videos (for backward scrolling)
         preloadPreviousVideos(currentVisibleIndex);
-        
-        // Don't stop observing - keep observing for potential reloads
       }
     });
-  }, {
-    rootMargin: '150px 0px', // Increased buffer for fast scrolling
-    threshold: 0.1
-  });
+  }, observerOptions);
 
   // Observe all videos for lazy loading
   videos.forEach(video => {
     lazyLoadObserver.observe(video);
   });
   
-  // Load first video and preload next 3 immediately
+  // Load first video and preload next videos immediately
   if (videoArray.length > 0) {
     loadVideo(videoArray[0], 0);
     preloadNextVideos(0);
+  }
+  
+  // Fallback: Force load all videos after 3 seconds on mobile if intersection observer fails
+  if (isMobile) {
+    setTimeout(() => {
+      const unloadedVideos = videoArray.filter((video, index) => !video.src && video.dataset.src);
+      if (unloadedVideos.length > 0) {
+        console.log(`🔄 Fallback: Loading ${unloadedVideos.length} remaining videos`);
+        unloadedVideos.forEach((video, index) => {
+          const originalIndex = videoArray.indexOf(video);
+          loadVideo(video, originalIndex);
+        });
+      }
+    }, 3000);
   }
 }
 
@@ -160,11 +193,17 @@ function shuffleVideos() {
   }
 }
 
-// YouTube Shorts-style autoplay functionality
+// Mobile-optimized autoplay functionality
 function setupVideoAutoplay() {
   const videos = document.querySelectorAll('.video-item video');
   let currentlyPlaying = null;
   let globalMuted = true;
+  let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  const observerOptions = {
+    threshold: isMobile ? 0.3 : 0.5, // Lower threshold on mobile
+    rootMargin: isMobile ? '0px 0px -5% 0px' : '0px 0px -10% 0px'
+  };
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -178,28 +217,50 @@ function setupVideoAutoplay() {
         
         // Play the current video if it has a source and is loaded
         if (video.src && video.readyState >= 2) { // HAVE_CURRENT_DATA or higher
-          video.play().catch(e => console.log('Autoplay prevented:', e));
-          currentlyPlaying = video;
+          // Mobile-specific play attempt
+          const playPromise = video.play();
           
-          // Track video view
-          const videoTitle = video.closest('.video-item').querySelector('h3').textContent;
-          performanceTracker.trackVideoView(videoTitle);
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                currentlyPlaying = video;
+                // Track video view
+                const videoTitle = video.closest('.video-item').querySelector('h3').textContent;
+                performanceTracker.trackVideoView(videoTitle);
+              })
+              .catch(e => {
+                console.log('Autoplay prevented on mobile:', e);
+                // On mobile, try to play again after user interaction
+                if (isMobile) {
+                  document.addEventListener('touchstart', () => {
+                    video.play().catch(e => console.log('Still cannot autoplay:', e));
+                  }, { once: true });
+                }
+              });
+          }
         }
       } else {
         // Pause video when not visible
         video.pause();
       }
     });
-  }, {
-    threshold: 0.5, // Video must be 50% visible to play
-    rootMargin: '0px 0px -10% 0px' // Slight buffer for better UX
-  });
+  }, observerOptions);
 
   // Observe all videos
   videos.forEach(video => {
     observer.observe(video);
     video.muted = globalMuted;
     video.volume = 0.5;
+    
+    // Mobile-specific video attributes
+    if (isMobile) {
+      video.setAttribute('playsinline', '');
+      video.setAttribute('webkit-playsinline', '');
+      video.setAttribute('x5-playsinline', '');
+      video.setAttribute('x5-video-player-type', 'h5');
+      video.setAttribute('x5-video-player-fullscreen', 'false');
+    }
+    
     // Add click to toggle global mute
     video.addEventListener('click', () => {
       globalMuted = !globalMuted;
@@ -213,7 +274,8 @@ function setupVideoAutoplay() {
 
 // On page load, setup lazy loading first, then shuffle videos, then setup autoplay
 window.onload = function() {
-  console.log('🚀 UDistrict page loading with enhanced lazy loading (preload +3) - Fixed for fast scrolling');
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  console.log(`🚀 UDistrict page loading - ${isMobile ? 'Mobile' : 'Desktop'} optimized`);
   
   // Setup lazy loading first
   setupLazyLoading();
@@ -234,7 +296,7 @@ window.onload = function() {
     videoFeed.style.scrollSnapType = 'y mandatory';
     setupVideoAutoplay();
     console.log('✅ Video autoplay setup complete');
-  }, 200);
+  }, isMobile ? 500 : 200); // Longer delay on mobile
   
   // Log performance report on page unload
   window.addEventListener('beforeunload', () => {

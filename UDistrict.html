@@ -287,5 +287,21 @@
     </div>
   </div>
   <script src="js/UDistrict.js"></script>
+  <!-- Fallback script for mobile video loading -->
+  <script>
+    // Fallback: If videos don't load within 5 seconds, force load them
+    setTimeout(function() {
+      const videos = document.querySelectorAll('video[data-src]');
+      videos.forEach(function(video) {
+        if (!video.src && video.dataset.src) {
+          console.log('Fallback: Loading video', video.dataset.src);
+          video.src = video.dataset.src;
+          video.setAttribute('playsinline', '');
+          video.setAttribute('webkit-playsinline', '');
+          video.setAttribute('x5-playsinline', '');
+        }
+      });
+    }, 5000);
+  </script>
 </body>
 </html> 

@@ -47,6 +47,12 @@ body {
   aspect-ratio: 9/16;
   display: block;
   background: #000;
+  object-fit: cover;
+  /* Mobile-specific video optimizations */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 .video-overlay {
   position: absolute;
@@ -98,8 +104,63 @@ body {
 @media (max-width: 600px) {
   .video-feed {
     padding: 0 0.2rem 2rem 0.2rem;
+    /* Mobile-specific optimizations */
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
   }
   .restaurant-header h1 {
     font-size: 1.3rem;
+  }
+  .video-item {
+    min-height: 70vh; /* Slightly smaller on mobile */
+  }
+  .video-item video {
+    /* Mobile video optimizations */
+    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
+  .video-overlay {
+    padding: 1rem 0.8rem 0.5rem 0.8rem;
+    min-height: 4rem;
+  }
+  .video-overlay h3 {
+    font-size: 1.1rem;
+  }
+  .order-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+  }
+}
+
+/* Additional mobile optimizations for iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .video-item video {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  .video-feed {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Loading state for videos */
+.video-item video:not([src]) {
+  background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+              linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+              linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+              linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
   }
 } 
