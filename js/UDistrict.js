@@ -29,19 +29,23 @@ class VideoPerformanceTracker {
 
 const performanceTracker = new VideoPerformanceTracker();
 
-// Enhanced lazy loading with preloading next 3 videos
+// Enhanced lazy loading with preloading next 3 videos - Fixed for fast scrolling
 function setupLazyLoading() {
   const videos = document.querySelectorAll('.video-item video[data-src]');
   const videoArray = Array.from(videos);
   let currentVisibleIndex = 0;
+  let loadingStates = new Map(); // Track loading state of each video
   
   // Function to load a specific video
   function loadVideo(video, index) {
-    if (!video.src && video.dataset.src) {
+    if (!video.src && video.dataset.src && !loadingStates.get(index)) {
       const startTime = performance.now();
       const videoSrc = video.dataset.src;
       
-      console.log(`🔄 Preloading video ${index + 1}: ${videoSrc}`);
+      // Mark as loading to prevent duplicate loads
+      loadingStates.set(index, 'loading');
+      
+      console.log(`🔄 Loading video ${index + 1}: ${videoSrc}`);
       
       // Load the video source
       video.src = videoSrc;
@@ -50,7 +54,14 @@ function setupLazyLoading() {
       video.addEventListener('loadeddata', () => {
         const loadTime = performance.now() - startTime;
         performanceTracker.trackVideoLoad(video, loadTime);
+        loadingStates.set(index, 'loaded');
         console.log(`✅ Video ${index + 1} loaded successfully`);
+      }, { once: true });
+      
+      // Handle load errors
+      video.addEventListener('error', () => {
+        console.error(`❌ Failed to load video ${index + 1}`);
+        loadingStates.set(index, 'error');
       }, { once: true });
     }
   }
@@ -72,19 +83,31 @@ function setupLazyLoading() {
       loadVideo(videoArray[index], index);
     });
     
-    console.log(`📦 Preloading videos: ${nextIndices.map(i => i + 1).join(', ')}`);
+    if (nextIndices.length > 0) {
+      console.log(`📦 Preloading videos: ${nextIndices.map(i => i + 1).join(', ')}`);
+    }
   }
   
-  // Function to unload distant videos (optional - for memory management)
-  function unloadDistantVideos(visibleIndex) {
-    videoArray.forEach((video, index) => {
-      const distance = Math.abs(index - visibleIndex);
-      if (distance > 5 && video.src) { // Unload videos more than 5 positions away
-        console.log(`🗑️ Unloading distant video ${index + 1}`);
-        video.src = '';
-        video.load(); // Clear the video buffer
+  // Function to preload previous 2 videos (for backward scrolling)
+  function preloadPreviousVideos(visibleIndex) {
+    const prevIndices = [];
+    
+    // Get previous 2 video indices
+    for (let i = 1; i <= 2; i++) {
+      const prevIndex = visibleIndex - i;
+      if (prevIndex >= 0) {
+        prevIndices.push(prevIndex);
       }
+    }
+    
+    // Load previous 2 videos
+    prevIndices.forEach(index => {
+      loadVideo(videoArray[index], index);
     });
+    
+    if (prevIndices.length > 0) {
+      console.log(`📦 Preloading previous videos: ${prevIndices.map(i => i + 1).join(', ')}`);
+    }
   }
 
   const lazyLoadObserver = new IntersectionObserver((entries) => {
@@ -94,9 +117,7 @@ function setupLazyLoading() {
       
       if (entry.isIntersecting) {
         // Load current video if not already loaded
-        if (!video.src) {
-          loadVideo(video, videoIndex);
-        }
+        loadVideo(video, videoIndex);
         
         // Update current visible index
         currentVisibleIndex = videoIndex;
@@ -104,15 +125,14 @@ function setupLazyLoading() {
         // Preload next 3 videos
         preloadNextVideos(currentVisibleIndex);
         
-        // Unload distant videos (optional)
-        unloadDistantVideos(currentVisibleIndex);
+        // Preload previous 2 videos (for backward scrolling)
+        preloadPreviousVideos(currentVisibleIndex);
         
-        // Stop observing this video since it's now loaded
-        lazyLoadObserver.unobserve(video);
+        // Don't stop observing - keep observing for potential reloads
       }
     });
   }, {
-    rootMargin: '100px 0px', // Start loading 100px before video becomes visible
+    rootMargin: '150px 0px', // Increased buffer for fast scrolling
     threshold: 0.1
   });
 
@@ -156,8 +176,8 @@ function setupVideoAutoplay() {
           currentlyPlaying.pause();
         }
         
-        // Play the current video if it has a source
-        if (video.src) {
+        // Play the current video if it has a source and is loaded
+        if (video.src && video.readyState >= 2) { // HAVE_CURRENT_DATA or higher
           video.play().catch(e => console.log('Autoplay prevented:', e));
           currentlyPlaying = video;
           
@@ -193,7 +213,7 @@ function setupVideoAutoplay() {
 
 // On page load, setup lazy loading first, then shuffle videos, then setup autoplay
 window.onload = function() {
-  console.log('🚀 UDistrict page loading with enhanced lazy loading (preload +3)');
+  console.log('🚀 UDistrict page loading with enhanced lazy loading (preload +3) - Fixed for fast scrolling');
   
   // Setup lazy loading first
   setupLazyLoading();
