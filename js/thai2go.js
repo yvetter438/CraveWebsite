@@ -1,3 +1,20 @@
+// Restaurant redirect function
+function redirectToRestaurant(restaurantId) {
+  // Redirect to the restaurant page
+  console.log(`Redirecting to restaurant: ${restaurantId}`);
+
+  // Restaurant URLs mapping
+  const restaurantUrls = {
+    'thai2go': 'thai2go.html',
+    // You can add other restaurants here later
+  };
+
+  if (restaurantUrls[restaurantId]) {
+    // Redirect to the restaurant page
+    window.location.href = restaurantUrls[restaurantId];
+  }
+}
+
 // YouTube Shorts-style autoplay functionality
 function setupVideoAutoplay() {
   const videos = document.querySelectorAll('.video-item video');

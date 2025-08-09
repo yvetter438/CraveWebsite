@@ -55,6 +55,23 @@ function setupVideoAutoplay() {
   });
 }
 
+// Restaurant redirect function
+function redirectToRestaurant(restaurantId) {
+  // Redirect to the restaurant page
+  console.log(`Redirecting to restaurant: ${restaurantId}`);
+
+  // Restaurant URLs mapping
+  const restaurantUrls = {
+    'solonoodle': 'solonoodle.html',
+    // You can add other restaurants here later
+  };
+
+  if (restaurantUrls[restaurantId]) {
+    // Redirect to the restaurant page
+    window.location.href = restaurantUrls[restaurantId];
+  }
+}
+
 // On page load, shuffle videos first, then setup autoplay
 window.onload = function() {
   // Shuffle videos first
