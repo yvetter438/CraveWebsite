@@ -65,7 +65,8 @@ function redirectToRestaurant(restaurantId) {
     'thai2go': 'thai2go.html',
     'solonoodle': 'solonoodle.html',
     'angkorwok': 'angkorwok.html',
-    'sweetalchemy': 'sweetalchemy.html'
+    'sweetalchemy': 'sweetalchemy.html',
+    'phoshizzle': 'phoshizzle.html'
   };
 
   if (restaurantUrls[restaurantId]) {
