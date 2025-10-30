@@ -19,70 +19,114 @@
     .qr { display: block; margin: 16px 0; width: 240px; height: 240px; }
     .muted { margin-top: 8px; font-size: 12px; color: #666; word-break: break-all; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 1px, 1px); white-space: nowrap; border: 0; }
+    .loading { text-align: center; }
+    .loading p { color: #999; }
   </style>
 </head>
 <body>
   <main>
     <h1>Continue in Crave</h1>
-    <div id="mobile-msg" style="display:none">
-      <p>We’re opening the app. If nothing happens, tap the button below.</p>
+    
+    <div id="loading" class="loading">
+      <p>Processing your request...</p>
     </div>
+
+    <div id="mobile-msg" style="display:none">
+      <p>We're opening the app. If nothing happens, tap the button below.</p>
+    </div>
+    
     <div id="desktop-msg" style="display:none">
       <p>Open this link on your phone where the Crave app is installed.</p>
       <ol>
-        <li>Scan the QR code below with your phone’s camera.</li>
+        <li>Scan the QR code below with your phone's camera.</li>
         <li>Or open this email on your phone and tap the button again.</li>
       </ol>
       <img id="qr" alt="QR code to open Crave" class="qr" />
       <div class="stores">
-        <a href="https://apps.apple.com" target="_blank" rel="noopener">Get on iOS</a>
+        <a href="https://apps.apple.com/us/app/crave-discover-eat-share/id6740149234" target="_blank" rel="noopener" class="btn">Get on iOS</a>
       </div>
     </div>
 
-    <a id="open-btn" class="btn" href="#">Open in App</a>
+    <a id="open-btn" class="btn" href="#" style="display:none">Open in App</a>
     <p id="deeplink" class="muted" aria-live="polite"></p>
 
     <script>
       (function () {
+        // Parse URL parameters from both query string and hash
         function parseParams() {
           try {
             var search = new URLSearchParams(window.location.search || "");
             var hash = new URLSearchParams((window.location.hash || "").replace(/^#/, ""));
-            // We only consume a target hint; tokens in hash are ignored and never forwarded.
-            var target = search.get("target") || "login";
-            return { target: target, search: search, hash: hash };
+            
+            return {
+              search: search,
+              hash: hash,
+              // Supabase auth params
+              access_token: search.get("access_token") || hash.get("access_token"),
+              refresh_token: search.get("refresh_token") || hash.get("refresh_token"),
+              token_type: search.get("token_type") || hash.get("token_type"),
+              type: search.get("type") || hash.get("type"), // 'signup', 'recovery', etc
+              // Custom params
+              target: search.get("target") || "login"
+            };
           } catch (e) {
-            return { target: "login", search: new URLSearchParams(), hash: new URLSearchParams() };
+            return {
+              search: new URLSearchParams(),
+              hash: new URLSearchParams(),
+              target: "login",
+              access_token: null,
+              refresh_token: null,
+              token_type: null,
+              type: null
+            };
           }
         }
 
         var params = parseParams();
-        // Deep link format: crave://<target>
-        var deepLink = "crave://" + params.target;
-
         var ua = (navigator.userAgent || "").toLowerCase();
         var isMobile = /iphone|ipad|ipod|android/.test(ua);
 
+        var loadingEl = document.getElementById("loading");
         var mobileMsg = document.getElementById("mobile-msg");
         var desktopMsg = document.getElementById("desktop-msg");
         var openBtn = document.getElementById("open-btn");
         var deeplinkEl = document.getElementById("deeplink");
         var qr = document.getElementById("qr");
 
-        if (deeplinkEl) deeplinkEl.textContent = "Deep link: " + deepLink;
+        // Build deep link with auth data if available
+        var deepLink = "crave://" + params.target;
+        
+        // If we have auth tokens, encode them in the deep link
+        if (params.access_token) {
+          var authData = btoa(JSON.stringify({
+            access_token: params.access_token,
+            refresh_token: params.refresh_token,
+            token_type: params.token_type,
+            type: params.type
+          }));
+          deepLink = "crave://" + params.target + "?auth=" + encodeURIComponent(authData);
+        }
+
+        // Show the appropriate message based on device
+        if (loadingEl) loadingEl.style.display = "none";
         if (openBtn) {
           openBtn.setAttribute("href", deepLink);
           openBtn.onclick = function (e) { e.preventDefault(); window.location.href = deepLink; };
+          openBtn.style.display = "inline-block";
         }
 
         if (isMobile) {
+          // Mobile: show message and try to open app
           if (mobileMsg) mobileMsg.style.display = "block";
-          // Allow initial render, then attempt to open the app shortly after.
+          if (deeplinkEl) deeplinkEl.textContent = "Deep link: " + deepLink;
+          // Allow initial render, then attempt to open the app
           setTimeout(function () { window.location.href = deepLink; }, 250);
         } else {
+          // Desktop: show QR code
           if (desktopMsg) desktopMsg.style.display = "block";
           var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=" + encodeURIComponent(deepLink);
           if (qr) qr.src = qrUrl;
+          if (deeplinkEl) deeplinkEl.textContent = "Deep link: " + deepLink;
         }
       })();
     </script>
