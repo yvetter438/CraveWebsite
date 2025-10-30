@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Continue in Crave</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="light dark">
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; margin: 0; color: #111; background: #fff; }
+    @media (prefers-color-scheme: dark) { body { color: #f4f4f4; background: #0b0b0b; } .btn { background:#f4f4f4; color:#111; } .muted { color:#9aa0a6; } }
+    main { max-width: 560px; margin: 64px auto; padding: 16px; }
+    h1 { margin: 0 0 12px; font-size: 28px; }
+    p { line-height: 1.6; margin: 8px 0; }
+    ol { margin: 8px 0 16px 20px; }
+    .btn { display: inline-block; margin-top: 16px; padding: 10px 16px; border-radius: 8px; background: #111; color: #fff; text-decoration: none; border: 0; cursor: pointer; }
+    .stores { display: flex; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+    .qr { display: block; margin: 16px 0; width: 240px; height: 240px; }
+    .muted { margin-top: 8px; font-size: 12px; color: #666; word-break: break-all; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 1px, 1px); white-space: nowrap; border: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Continue in Crave</h1>
+    <div id="mobile-msg" style="display:none">
+      <p>We’re opening the app. If nothing happens, tap the button below.</p>
+    </div>
+    <div id="desktop-msg" style="display:none">
+      <p>Open this link on your phone where the Crave app is installed.</p>
+      <ol>
+        <li>Scan the QR code below with your phone’s camera.</li>
+        <li>Or open this email on your phone and tap the button again.</li>
+      </ol>
+      <img id="qr" alt="QR code to open Crave" class="qr" />
+      <div class="stores">
+        <a href="https://apps.apple.com" target="_blank" rel="noopener">Get on iOS</a>
+      </div>
+    </div>
+
+    <a id="open-btn" class="btn" href="#">Open in App</a>
+    <p id="deeplink" class="muted" aria-live="polite"></p>
+
+    <script>
+      (function () {
+        function parseParams() {
+          try {
+            var search = new URLSearchParams(window.location.search || "");
+            var hash = new URLSearchParams((window.location.hash || "").replace(/^#/, ""));
+            // We only consume a target hint; tokens in hash are ignored and never forwarded.
+            var target = search.get("target") || "login";
+            return { target: target, search: search, hash: hash };
+          } catch (e) {
+            return { target: "login", search: new URLSearchParams(), hash: new URLSearchParams() };
+          }
+        }
+
+        var params = parseParams();
+        // Deep link format: crave://<target>
+        var deepLink = "crave://" + params.target;
+
+        var ua = (navigator.userAgent || "").toLowerCase();
+        var isMobile = /iphone|ipad|ipod|android/.test(ua);
+
+        var mobileMsg = document.getElementById("mobile-msg");
+        var desktopMsg = document.getElementById("desktop-msg");
+        var openBtn = document.getElementById("open-btn");
+        var deeplinkEl = document.getElementById("deeplink");
+        var qr = document.getElementById("qr");
+
+        if (deeplinkEl) deeplinkEl.textContent = "Deep link: " + deepLink;
+        if (openBtn) {
+          openBtn.setAttribute("href", deepLink);
+          openBtn.onclick = function (e) { e.preventDefault(); window.location.href = deepLink; };
+        }
+
+        if (isMobile) {
+          if (mobileMsg) mobileMsg.style.display = "block";
+          // Allow initial render, then attempt to open the app shortly after.
+          setTimeout(function () { window.location.href = deepLink; }, 250);
+        } else {
+          if (desktopMsg) desktopMsg.style.display = "block";
+          var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=" + encodeURIComponent(deepLink);
+          if (qr) qr.src = qrUrl;
+        }
+      })();
+    </script>
+  </main>
+</body>
+</html>
+
+
