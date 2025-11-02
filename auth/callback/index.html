@@ -67,19 +67,58 @@
               token_type: search.get("token_type") || hash.get("token_type"),
               type: search.get("type") || hash.get("type"), // 'signup', 'recovery', etc
               // Custom params
-              target: search.get("target") || "login"
+              target: search.get("target") || null,
+              redirect_to: search.get("redirect_to") || null
             };
           } catch (e) {
             return {
               search: new URLSearchParams(),
               hash: new URLSearchParams(),
-              target: "login",
+              target: null,
+              redirect_to: null,
               access_token: null,
               refresh_token: null,
               token_type: null,
               type: null
             };
           }
+        }
+
+        function determineTarget(params) {
+          // 1. If redirect_to is provided (from Supabase), use it
+          if (params.redirect_to) {
+            // If it's already a deep link, extract the path
+            if (params.redirect_to.startsWith("crave://")) {
+              var path = params.redirect_to.replace(/^crave:\/\//, "");
+              // Remove query params and hash if present
+              path = path.split("?")[0].split("#")[0];
+              return path;
+            }
+            // If it's a web URL, extract the path or treat as generic redirect
+            try {
+              var url = new URL(params.redirect_to);
+              // For web redirects, we'll still route to login by default
+              // but handle recovery specially
+            } catch (e) {}
+          }
+
+          // 2. Handle recovery type (password reset)
+          if (params.type === "recovery") {
+            return "reset-password";
+          }
+
+          // 3. Handle signup type
+          if (params.type === "signup") {
+            return "signup";
+          }
+
+          // 4. Use custom target if provided
+          if (params.target) {
+            return params.target;
+          }
+
+          // 5. Default to login
+          return "login";
         }
 
         var params = parseParams();
@@ -93,8 +132,11 @@
         var deeplinkEl = document.getElementById("deeplink");
         var qr = document.getElementById("qr");
 
+        // Determine the target screen
+        var target = determineTarget(params);
+
         // Build deep link with auth data if available
-        var deepLink = "crave://" + params.target;
+        var deepLink = "crave://" + target;
         
         // If we have auth tokens, encode them in the deep link
         if (params.access_token) {
@@ -104,7 +146,7 @@
             token_type: params.token_type,
             type: params.type
           }));
-          deepLink = "crave://" + params.target + "?auth=" + encodeURIComponent(authData);
+          deepLink = "crave://" + target + "?auth=" + encodeURIComponent(authData);
         }
 
         // Show the appropriate message based on device
