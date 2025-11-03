@@ -92,7 +92,10 @@
               var path = params.redirect_to.replace(/^crave:\/\//, "");
               // Remove query params and hash if present
               path = path.split("?")[0].split("#")[0];
-              return path;
+              // If path is empty or just whitespace, treat it as no specific redirect
+              if (path && path.trim()) {
+                return path;
+              }
             }
             // If it's a web URL, extract the path or treat as generic redirect
             try {
@@ -107,17 +110,12 @@
             return "reset-password";
           }
 
-          // 3. Handle signup type
-          if (params.type === "signup") {
-            return "signup";
-          }
-
-          // 4. Use custom target if provided
+          // 3. Use custom target if provided
           if (params.target) {
             return params.target;
           }
 
-          // 5. Default to login
+          // 4. Default to login (including signup confirmation)
           return "login";
         }
 
