@@ -61,6 +61,8 @@
             return {
               search: search,
               hash: hash,
+              // PKCE authorization code (from Supabase redirect)
+              code: search.get("code") || hash.get("code"),
               // Supabase auth params - PKCE token (for recovery, signup, etc)
               token: search.get("token") || hash.get("token"),
               // Session tokens (if available)
@@ -76,6 +78,7 @@
             return {
               search: new URLSearchParams(),
               hash: new URLSearchParams(),
+              code: null,
               target: null,
               redirect_to: null,
               token: null,
@@ -88,6 +91,12 @@
         }
 
         function determineTarget(params) {
+          // CRITICAL: If we have a code (PKCE flow), this is likely from a password reset
+          // Default to reset-password if we have code but no explicit type
+          if (params.code && !params.type) {
+            return "reset-password";
+          }
+
           // Check recovery type FIRST (password reset)
           if (params.type === "recovery") {
             return "reset-password";
@@ -130,6 +139,7 @@
         console.log("🔍 Search params:", window.location.search);
         console.log("🔍 Hash params:", window.location.hash);
         console.log("🔍 Parsed params:", {
+          code: params.code ? params.code.substring(0, 20) + "..." : "❌ MISSING",
           token: params.token ? params.token.substring(0, 20) + "..." : "❌ MISSING",
           type: params.type || "❌ MISSING",
           access_token: params.access_token ? "✅ Present" : "❌ MISSING",
@@ -158,13 +168,25 @@
         // Build query parameters as direct params (not base64 JSON)
         var queryParams = [];
         
-        // Add PKCE token if available (for password recovery, email verification, etc)
+        // CRITICAL: If we have a code (PKCE authorization code), use that FIRST
+        if (params.code) {
+          queryParams.push("code=" + encodeURIComponent(params.code));
+          // Infer type from context - if we got a code from password reset flow, it's recovery
+          if (!params.type) {
+            queryParams.push("type=recovery"); // Default for password reset flow
+            console.log("✅ Using PKCE code flow for password reset");
+          } else {
+            queryParams.push("type=" + encodeURIComponent(params.type));
+          }
+        }
+        
+        // Add PKCE token if available (alternative flow)
         if (params.token) {
           queryParams.push("token=" + encodeURIComponent(params.token));
         }
         
-        // Add type if available
-        if (params.type) {
+        // Add type if explicitly provided (but don't override if we already added it from code)
+        if (params.type && !params.code) {
           queryParams.push("type=" + encodeURIComponent(params.type));
         }
         
