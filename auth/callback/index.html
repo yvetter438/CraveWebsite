@@ -7,6 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="referrer" content="no-referrer">
   <meta name="color-scheme" content="light dark">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; margin: 0; color: #111; background: #fff; }
     @media (prefers-color-scheme: dark) { body { color: #f4f4f4; background: #0b0b0b; } .btn { background:#f4f4f4; color:#111; } .muted { color:#9aa0a6; } }
@@ -51,7 +52,54 @@
     <p id="deeplink" class="muted" aria-live="polite"></p>
 
     <script>
-      (function () {
+      (async function () {
+        // Initialize Supabase client (UPDATE THESE VALUES WITH YOUR SUPABASE CREDENTIALS)
+        const supabaseUrl = 'https://idcjvxdjqgjihnxtsiiz.supabase.co'; // TODO: Replace with your Supabase URL
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkY2p2eGRqcWdqaWhueHRzaWl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUxMDM0MDEsImV4cCI6MjA1MDY3OTQwMX0.n5waj8HHbnJhblpTw-eN6xwjD_3dOQbYbiRWOMRNMfM'; // TODO: Replace with your Supabase anon key
+        
+        // Wait for Supabase to load (with timeout)
+        const waitForSupabase = () => {
+          return new Promise((resolve) => {
+            let attempts = 0;
+            const maxAttempts = 10; // Wait up to 1 second (10 * 100ms)
+            const checkInterval = setInterval(() => {
+              attempts++;
+              if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
+                clearInterval(checkInterval);
+                resolve(true);
+              } else if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+                clearInterval(checkInterval);
+                resolve(true);
+              } else if (attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                resolve(false);
+              }
+            }, 100);
+          });
+        };
+        
+        // Wait for Supabase library to be available
+        const supabaseLoaded = await waitForSupabase();
+        
+        // Initialize Supabase client
+        let supabaseClient = null;
+        if (supabaseLoaded) {
+          try {
+            // Supabase CDN loads as global 'supabase' object with createClient method
+            if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
+              supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+            } else if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+              supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+            }
+            console.log('✅ Supabase client initialized');
+          } catch (e) {
+            console.error('⚠️ Supabase client initialization failed:', e);
+          }
+        } else {
+          console.warn('⚠️ Supabase client not available after waiting, will pass code directly');
+          console.warn('⚠️ Make sure Supabase JS library is loaded from CDN and anon key is set');
+        }
+
         // Parse URL parameters from both query string and hash
         function parseParams() {
           try {
@@ -168,34 +216,63 @@
         // Build query parameters as direct params (not base64 JSON)
         var queryParams = [];
         
-        // CRITICAL: If we have a code (PKCE authorization code), use that FIRST
-        if (params.code) {
+        // CRITICAL: If we have a code (PKCE authorization code), exchange it for session tokens
+        if (params.code && supabaseClient) {
+          console.log("🔑 Exchanging PKCE code for session tokens...");
+          try {
+            const { data, error } = await supabaseClient.auth.exchangeCodeForSession(params.code);
+            
+            if (error) {
+              console.error("❌ Code exchange failed:", error);
+              // Fallback: pass code and let app try (though it might fail)
+              queryParams.push("code=" + encodeURIComponent(params.code));
+              if (params.type) {
+                queryParams.push("type=" + encodeURIComponent(params.type));
+              } else {
+                queryParams.push("type=recovery");
+              }
+              console.log("⚠️ Passing code directly to app (exchange failed)");
+            } else if (data && data.session) {
+              console.log("✅ Code exchanged successfully, got session tokens");
+              // Pass session tokens to app instead of code
+              queryParams.push("access_token=" + encodeURIComponent(data.session.access_token));
+              queryParams.push("refresh_token=" + encodeURIComponent(data.session.refresh_token));
+              if (params.type) {
+                queryParams.push("type=" + encodeURIComponent(params.type));
+              } else {
+                queryParams.push("type=recovery"); // Password reset
+              }
+              console.log("✅ Passing session tokens to app");
+            } else {
+              console.warn("⚠️ Code exchange returned no session data");
+              // Fallback to code
+              queryParams.push("code=" + encodeURIComponent(params.code));
+              queryParams.push("type=recovery");
+            }
+          } catch (e) {
+            console.error("❌ Error exchanging code:", e);
+            // Fallback: pass code anyway
+            queryParams.push("code=" + encodeURIComponent(params.code));
+            queryParams.push("type=recovery");
+          }
+        } else if (params.code) {
+          // No Supabase client available, pass code (will likely fail but worth trying)
+          console.log("⚠️ No Supabase client, passing code directly (may fail)");
           queryParams.push("code=" + encodeURIComponent(params.code));
-          // Infer type from context - if we got a code from password reset flow, it's recovery
-          if (!params.type) {
-            queryParams.push("type=recovery"); // Default for password reset flow
-            console.log("✅ Using PKCE code flow for password reset");
-          } else {
+          queryParams.push("type=recovery");
+        } else if (params.token) {
+          // PKCE token (alternative flow)
+          queryParams.push("token=" + encodeURIComponent(params.token));
+          if (params.type) {
             queryParams.push("type=" + encodeURIComponent(params.type));
           }
-        }
-        
-        // Add PKCE token if available (alternative flow)
-        if (params.token) {
-          queryParams.push("token=" + encodeURIComponent(params.token));
-        }
-        
-        // Add type if explicitly provided (but don't override if we already added it from code)
-        if (params.type && !params.code) {
-          queryParams.push("type=" + encodeURIComponent(params.type));
-        }
-        
-        // Add session tokens if available (alternative auth flow)
-        if (params.access_token) {
+        } else if (params.access_token && params.refresh_token) {
+          // Already have session tokens
           queryParams.push("access_token=" + encodeURIComponent(params.access_token));
-        }
-        if (params.refresh_token) {
           queryParams.push("refresh_token=" + encodeURIComponent(params.refresh_token));
+          if (params.type) {
+            queryParams.push("type=" + encodeURIComponent(params.type));
+          }
         }
         
         // Append query string if we have params
