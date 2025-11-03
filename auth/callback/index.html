@@ -53,21 +53,18 @@
 
     <script>
       (async function () {
-        // Initialize Supabase client (UPDATE THESE VALUES WITH YOUR SUPABASE CREDENTIALS)
-        const supabaseUrl = 'https://idcjvxdjqgjihnxtsiiz.supabase.co'; // TODO: Replace with your Supabase URL
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkY2p2eGRqcWdqaWhueHRzaWl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUxMDM0MDEsImV4cCI6MjA1MDY3OTQwMX0.n5waj8HHbnJhblpTw-eN6xwjD_3dOQbYbiRWOMRNMfM'; // TODO: Replace with your Supabase anon key
+        // Initialize Supabase client
+        const supabaseUrl = 'https://idcjvxdjqgjihnxtsiiz.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkY2p2eGRqcWdqaWhueHRzaWl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUxMDM0MDEsImV4cCI6MjA1MDY3OTQwMX0.n5waj8HHbnJhblpTw-eN6xwjD_3dOQbYbiRWOMRNMfM';
         
-        // Wait for Supabase to load (with timeout)
+        // Wait for Supabase library to load
         const waitForSupabase = () => {
           return new Promise((resolve) => {
             let attempts = 0;
-            const maxAttempts = 10; // Wait up to 1 second (10 * 100ms)
+            const maxAttempts = 20; // Wait up to 2 seconds
             const checkInterval = setInterval(() => {
               attempts++;
-              if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
-                clearInterval(checkInterval);
-                resolve(true);
-              } else if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+              if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
                 clearInterval(checkInterval);
                 resolve(true);
               } else if (attempts >= maxAttempts) {
@@ -78,123 +75,81 @@
           });
         };
         
-        // Wait for Supabase library to be available
         const supabaseLoaded = await waitForSupabase();
-        
-        // Initialize Supabase client
         let supabaseClient = null;
+        
         if (supabaseLoaded) {
           try {
-            // Supabase CDN loads as global 'supabase' object with createClient method
-            if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
-              supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
-            } else if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
-              supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-            }
+            supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey, {
+              auth: {
+                detectSessionInUrl: true,
+                flowType: 'pkce'
+              }
+            });
             console.log('✅ Supabase client initialized');
           } catch (e) {
-            console.error('⚠️ Supabase client initialization failed:', e);
+            console.error('❌ Supabase client initialization failed:', e);
           }
         } else {
-          console.warn('⚠️ Supabase client not available after waiting, will pass code directly');
-          console.warn('⚠️ Make sure Supabase JS library is loaded from CDN and anon key is set');
+          console.warn('⚠️ Supabase client not loaded - will pass code directly');
         }
 
-        // Parse URL parameters from both query string and hash
+        // Parse URL parameters
         function parseParams() {
           try {
             var search = new URLSearchParams(window.location.search || "");
             var hash = new URLSearchParams((window.location.hash || "").replace(/^#/, ""));
             
             return {
-              search: search,
-              hash: hash,
-              // PKCE authorization code (from Supabase redirect)
               code: search.get("code") || hash.get("code"),
-              // Supabase auth params - PKCE token (for recovery, signup, etc)
               token: search.get("token") || hash.get("token"),
-              // Session tokens (if available)
               access_token: search.get("access_token") || hash.get("access_token"),
               refresh_token: search.get("refresh_token") || hash.get("refresh_token"),
-              token_type: search.get("token_type") || hash.get("token_type"),
-              type: search.get("type") || hash.get("type"), // 'signup', 'recovery', etc
-              // Custom params
+              type: search.get("type") || hash.get("type"),
               target: search.get("target") || null,
               redirect_to: search.get("redirect_to") || null
             };
           } catch (e) {
             return {
-              search: new URLSearchParams(),
-              hash: new URLSearchParams(),
               code: null,
-              target: null,
-              redirect_to: null,
               token: null,
               access_token: null,
               refresh_token: null,
-              token_type: null,
-              type: null
+              type: null,
+              target: null,
+              redirect_to: null
             };
           }
         }
 
         function determineTarget(params) {
-          // CRITICAL: If we have a code (PKCE flow), this is likely from a password reset
-          // Default to reset-password if we have code but no explicit type
-          if (params.code && !params.type) {
-            return "reset-password";
-          }
-
-          // Check recovery type FIRST (password reset)
           if (params.type === "recovery") {
             return "reset-password";
           }
-
-          // If redirect_to is provided (from Supabase), use it
-          if (params.redirect_to) {
-            // If it's already a deep link, extract the path
-            if (params.redirect_to.startsWith("crave://")) {
-              var path = params.redirect_to.replace(/^crave:\/\//, "");
-              // Remove query params and hash if present
-              path = path.split("?")[0].split("#")[0];
-              // If path is empty or just whitespace, treat it as no specific redirect
-              if (path && path.trim()) {
-                return path;
-              }
-            }
-            // If it's a web URL, extract the path or treat as generic redirect
-            try {
-              var url = new URL(params.redirect_to);
-              // For web redirects, we'll still route to login by default
-            } catch (e) {}
+          if (params.code && !params.type) {
+            return "reset-password";
           }
-
-          // Use custom target if provided
+          if (params.redirect_to && params.redirect_to.startsWith("crave://")) {
+            var path = params.redirect_to.replace(/^crave:\/\//, "").split("?")[0].split("#")[0];
+            if (path && path.trim()) {
+              return path;
+            }
+          }
           if (params.target) {
             return params.target;
           }
-
-          // Default to login (including signup confirmation)
           return "login";
         }
 
         var params = parseParams();
 
-        // 🔍 DEBUG SECTION - Log all received parameters
+        // Debug logging
         console.log("🔍 ========================================");
-        console.log("🔍 Website received URL:", window.location.href);
-        console.log("🔍 Full URL:", window.location.href);
-        console.log("🔍 Search params:", window.location.search);
-        console.log("🔍 Hash params:", window.location.hash);
-        console.log("🔍 Parsed params:", {
-          code: params.code ? params.code.substring(0, 20) + "..." : "❌ MISSING",
-          token: params.token ? params.token.substring(0, 20) + "..." : "❌ MISSING",
-          type: params.type || "❌ MISSING",
-          access_token: params.access_token ? "✅ Present" : "❌ MISSING",
-          refresh_token: params.refresh_token ? "✅ Present" : "❌ MISSING",
-          redirect_to: params.redirect_to || "❌ MISSING",
-          target: params.target || "❌ MISSING"
-        });
+        console.log("🔍 Website URL:", window.location.href);
+        console.log("🔍 Has code:", !!params.code);
+        console.log("🔍 Has token:", !!params.token);
+        console.log("🔍 Has access_token:", !!params.access_token);
+        console.log("🔍 Type:", params.type || "none");
         console.log("🔍 ========================================");
 
         var ua = (navigator.userAgent || "").toLowerCase();
@@ -207,57 +162,86 @@
         var deeplinkEl = document.getElementById("deeplink");
         var qr = document.getElementById("qr");
 
-        // Determine the target screen
         var target = determineTarget(params);
-
-        // Build deep link - start with target
         var deepLink = "crave://" + target;
-        
-        // Build query parameters as direct params (not base64 JSON)
         var queryParams = [];
         
-        // CRITICAL: If we have a code (PKCE authorization code), exchange it for session tokens
+        // CRITICAL: Try to exchange code for session tokens
         if (params.code && supabaseClient) {
-          console.log("🔑 Exchanging PKCE code for session tokens...");
+          console.log("🔑 Attempting to exchange PKCE code for session tokens...");
+          console.log("🔑 Code:", params.code.substring(0, 20) + "...");
+          
           try {
-            const { data, error } = await supabaseClient.auth.exchangeCodeForSession(params.code);
+            // Try Supabase's automatic session detection from URL
+            console.log("🔑 Attempting automatic session detection from URL...");
+            const { data: urlSessionData, error: urlError } = await supabaseClient.auth.getSessionFromUrl({ 
+              storeSession: false 
+            });
             
-            if (error) {
-              console.error("❌ Code exchange failed:", error);
-              // Fallback: pass code and let app try (though it might fail)
-              queryParams.push("code=" + encodeURIComponent(params.code));
+            if (urlSessionData && urlSessionData.session && !urlError) {
+              console.log("✅ Got session from URL automatically!");
+              queryParams.push("access_token=" + encodeURIComponent(urlSessionData.session.access_token));
+              queryParams.push("refresh_token=" + encodeURIComponent(urlSessionData.session.refresh_token));
               if (params.type) {
                 queryParams.push("type=" + encodeURIComponent(params.type));
               } else {
                 queryParams.push("type=recovery");
               }
-              console.log("⚠️ Passing code directly to app (exchange failed)");
-            } else if (data && data.session) {
-              console.log("✅ Code exchanged successfully, got session tokens");
-              // Pass session tokens to app instead of code
-              queryParams.push("access_token=" + encodeURIComponent(data.session.access_token));
-              queryParams.push("refresh_token=" + encodeURIComponent(data.session.refresh_token));
-              if (params.type) {
-                queryParams.push("type=" + encodeURIComponent(params.type));
-              } else {
-                queryParams.push("type=recovery"); // Password reset
-              }
               console.log("✅ Passing session tokens to app");
             } else {
-              console.warn("⚠️ Code exchange returned no session data");
-              // Fallback to code
-              queryParams.push("code=" + encodeURIComponent(params.code));
-              queryParams.push("type=recovery");
+              // Try manual exchange
+              console.log("🔑 Automatic detection failed, trying manual code exchange...");
+              const { data: exchangeData, error: exchangeError } = await supabaseClient.auth.exchangeCodeForSession(params.code);
+              
+              if (exchangeError) {
+                console.error("❌ Code exchange failed:", exchangeError);
+                console.error("❌ Error:", exchangeError.message);
+                console.error("❌ This likely means PKCE verifier is not in browser storage");
+                console.error("❌ Verifier is probably stored in the mobile app that initiated reset");
+                
+                // Pass code to app - it will try to exchange but will likely fail
+                queryParams.push("code=" + encodeURIComponent(params.code));
+                if (params.type) {
+                  queryParams.push("type=" + encodeURIComponent(params.type));
+                } else {
+                  queryParams.push("type=recovery");
+                }
+                console.log("⚠️ Passing code to app - app exchange will likely fail (bad_code_verifier)");
+              } else if (exchangeData && exchangeData.session) {
+                console.log("✅ Code exchanged successfully!");
+                queryParams.push("access_token=" + encodeURIComponent(exchangeData.session.access_token));
+                queryParams.push("refresh_token=" + encodeURIComponent(exchangeData.session.refresh_token));
+                if (params.type) {
+                  queryParams.push("type=" + encodeURIComponent(params.type));
+                } else {
+                  queryParams.push("type=recovery");
+                }
+                console.log("✅ Passing session tokens to app");
+              } else {
+                console.warn("⚠️ Exchange succeeded but no session returned");
+                // Fallback to passing code
+                queryParams.push("code=" + encodeURIComponent(params.code));
+                if (params.type) {
+                  queryParams.push("type=" + encodeURIComponent(params.type));
+                } else {
+                  queryParams.push("type=recovery");
+                }
+              }
             }
           } catch (e) {
-            console.error("❌ Error exchanging code:", e);
-            // Fallback: pass code anyway
+            console.error("❌ Error during code exchange:", e);
+            // Fallback: pass code
             queryParams.push("code=" + encodeURIComponent(params.code));
-            queryParams.push("type=recovery");
+            if (params.type) {
+              queryParams.push("type=" + encodeURIComponent(params.type));
+            } else {
+              queryParams.push("type=recovery");
+            }
+            console.log("⚠️ Exception caught - passing code to app");
           }
         } else if (params.code) {
-          // No Supabase client available, pass code (will likely fail but worth trying)
-          console.log("⚠️ No Supabase client, passing code directly (may fail)");
+          // No Supabase client available
+          console.log("⚠️ No Supabase client - passing code directly");
           queryParams.push("code=" + encodeURIComponent(params.code));
           queryParams.push("type=recovery");
         } else if (params.token) {
@@ -275,20 +259,12 @@
           }
         }
         
-        // Append query string if we have params
         if (queryParams.length > 0) {
           deepLink += "?" + queryParams.join("&");
         }
 
-        // 🔍 DEBUG: Log final deep link and routing decision
-        console.log("🔍 ========================================");
-        console.log("🔍 Routing decision:");
-        console.log("🔍   Target screen:", target);
-        console.log("🔍   Query params added:", queryParams.length);
-        console.log("🔍   Final deep link:", deepLink);
-        console.log("🔍 ========================================");
+        console.log("🔍 Final deep link:", deepLink);
 
-        // Show the appropriate message based on device
         if (loadingEl) loadingEl.style.display = "none";
         if (openBtn) {
           openBtn.setAttribute("href", deepLink);
@@ -300,15 +276,12 @@
         }
 
         if (isMobile) {
-          // Mobile: show message and try to open app
           if (mobileMsg) mobileMsg.style.display = "block";
           if (deeplinkEl) deeplinkEl.textContent = "Deep link: " + deepLink;
-          // Allow initial render, then attempt to open the app
           setTimeout(function () { 
             window.location.href = deepLink; 
           }, 250);
         } else {
-          // Desktop: show QR code
           if (desktopMsg) desktopMsg.style.display = "block";
           var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=" + encodeURIComponent(deepLink);
           if (qr) qr.src = qrUrl;
@@ -319,5 +292,3 @@
   </main>
 </body>
 </html>
-
-
