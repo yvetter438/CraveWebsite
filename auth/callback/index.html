@@ -122,6 +122,23 @@
         }
 
         var params = parseParams();
+
+        // 🔍 DEBUG SECTION - Log all received parameters
+        console.log("🔍 ========================================");
+        console.log("🔍 Website received URL:", window.location.href);
+        console.log("🔍 Full URL:", window.location.href);
+        console.log("🔍 Search params:", window.location.search);
+        console.log("🔍 Hash params:", window.location.hash);
+        console.log("🔍 Parsed params:", {
+          token: params.token ? params.token.substring(0, 20) + "..." : "❌ MISSING",
+          type: params.type || "❌ MISSING",
+          access_token: params.access_token ? "✅ Present" : "❌ MISSING",
+          refresh_token: params.refresh_token ? "✅ Present" : "❌ MISSING",
+          redirect_to: params.redirect_to || "❌ MISSING",
+          target: params.target || "❌ MISSING"
+        });
+        console.log("🔍 ========================================");
+
         var ua = (navigator.userAgent || "").toLowerCase();
         var isMobile = /iphone|ipad|ipod|android/.test(ua);
 
@@ -164,7 +181,13 @@
           deepLink += "?" + queryParams.join("&");
         }
 
-        console.log("Deep link:", deepLink); // For debugging
+        // 🔍 DEBUG: Log final deep link and routing decision
+        console.log("🔍 ========================================");
+        console.log("🔍 Routing decision:");
+        console.log("🔍   Target screen:", target);
+        console.log("🔍   Query params added:", queryParams.length);
+        console.log("🔍   Final deep link:", deepLink);
+        console.log("🔍 ========================================");
 
         // Show the appropriate message based on device
         if (loadingEl) loadingEl.style.display = "none";
