@@ -22,6 +22,7 @@
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 1px, 1px); white-space: nowrap; border: 0; }
     .loading { text-align: center; }
     .loading p { color: #999; }
+    .error { color: #d32f2f; background: #ffebee; padding: 12px; border-radius: 8px; margin: 16px 0; }
   </style>
 </head>
 <body>
@@ -30,6 +31,10 @@
     
     <div id="loading" class="loading">
       <p>Processing your request...</p>
+    </div>
+
+    <div id="error-msg" class="error" style="display:none">
+      <p id="error-text"></p>
     </div>
 
     <div id="mobile-msg" style="display:none">
@@ -94,28 +99,38 @@
           console.warn('⚠️ Supabase client not loaded - will pass code directly');
         }
 
-        // Parse URL parameters
+        // Parse URL parameters (including errors)
         function parseParams() {
           try {
             var search = new URLSearchParams(window.location.search || "");
             var hash = new URLSearchParams((window.location.hash || "").replace(/^#/, ""));
             
             return {
+              // Auth params
               code: search.get("code") || hash.get("code"),
               token: search.get("token") || hash.get("token"),
               access_token: search.get("access_token") || hash.get("access_token"),
               refresh_token: search.get("refresh_token") || hash.get("refresh_token"),
               type: search.get("type") || hash.get("type"),
+              // Error params (CRITICAL: check these first!)
+              error: search.get("error") || hash.get("error"),
+              error_description: search.get("error_description") || hash.get("error_description"),
+              error_code: search.get("error_code") || hash.get("error_code"),
+              // Custom params
               target: search.get("target") || null,
               redirect_to: search.get("redirect_to") || null
             };
           } catch (e) {
+            console.error("Error parsing params:", e);
             return {
               code: null,
               token: null,
               access_token: null,
               refresh_token: null,
               type: null,
+              error: null,
+              error_description: null,
+              error_code: null,
               target: null,
               redirect_to: null
             };
@@ -146,16 +161,28 @@
         // Debug logging
         console.log("🔍 ========================================");
         console.log("🔍 Website URL:", window.location.href);
-        console.log("🔍 Has code:", !!params.code);
-        console.log("🔍 Has token:", !!params.token);
-        console.log("🔍 Has access_token:", !!params.access_token);
-        console.log("🔍 Type:", params.type || "none");
+        console.log("🔍 Full URL:", window.location.href);
+        console.log("🔍 Search params:", window.location.search);
+        console.log("🔍 Hash params:", window.location.hash);
+        console.log("🔍 Parsed params:", {
+          code: params.code ? params.code.substring(0, 20) + "..." : "❌ MISSING",
+          token: params.token ? params.token.substring(0, 20) + "..." : "❌ MISSING",
+          type: params.type || "❌ MISSING",
+          error: params.error || "❌ MISSING",
+          error_description: params.error_description || "❌ MISSING",
+          access_token: params.access_token ? "✅ Present" : "❌ MISSING",
+          refresh_token: params.refresh_token ? "✅ Present" : "❌ MISSING",
+          redirect_to: params.redirect_to || "❌ MISSING",
+          target: params.target || "❌ MISSING"
+        });
         console.log("🔍 ========================================");
 
         var ua = (navigator.userAgent || "").toLowerCase();
         var isMobile = /iphone|ipad|ipod|android/.test(ua);
 
         var loadingEl = document.getElementById("loading");
+        var errorMsg = document.getElementById("error-msg");
+        var errorText = document.getElementById("error-text");
         var mobileMsg = document.getElementById("mobile-msg");
         var desktopMsg = document.getElementById("desktop-msg");
         var openBtn = document.getElementById("open-btn");
@@ -166,8 +193,43 @@
         var deepLink = "crave://" + target;
         var queryParams = [];
         
-        // CRITICAL: Try to exchange code for session tokens
-        if (params.code && supabaseClient) {
+        // CRITICAL: Check for errors FIRST before attempting anything else
+        if (params.error) {
+          console.error("❌ Authentication error detected:", params.error);
+          console.error("❌ Error description:", params.error_description);
+          
+          var errorMessage = params.error_description || params.error || "Authentication failed";
+          
+          // Show error on page
+          if (errorMsg) {
+            errorText.textContent = "Authentication Error: " + errorMessage;
+            errorMsg.style.display = "block";
+            if (loadingEl) loadingEl.style.display = "none";
+          }
+          
+          // Pass error to app so it can show proper error message
+          queryParams.push("error=" + encodeURIComponent(params.error));
+          if (params.error_description) {
+            queryParams.push("error_description=" + encodeURIComponent(params.error_description));
+          }
+          if (params.type) {
+            queryParams.push("type=" + encodeURIComponent(params.type));
+          } else {
+            queryParams.push("type=recovery");
+          }
+          
+          // Still build the deep link so user can try to open app
+          // App will handle showing the error
+          if (queryParams.length > 0) {
+            deepLink += "?" + queryParams.join("&");
+          }
+          
+          console.log("⚠️ Passing error to app:", deepLink);
+          
+          // Don't try to exchange code if there's an error
+        } 
+        // Try to exchange code for session tokens ONLY if no error
+        else if (params.code && supabaseClient) {
           console.log("🔑 Attempting to exchange PKCE code for session tokens...");
           console.log("🔑 Code:", params.code.substring(0, 20) + "...");
           
@@ -177,6 +239,11 @@
             const { data: urlSessionData, error: urlError } = await supabaseClient.auth.getSessionFromUrl({ 
               storeSession: false 
             });
+            
+            if (urlError) {
+              console.error("❌ getSessionFromUrl error:", urlError);
+              // Fall through to manual exchange
+            }
             
             if (urlSessionData && urlSessionData.session && !urlError) {
               console.log("✅ Got session from URL automatically!");
@@ -196,17 +263,17 @@
               if (exchangeError) {
                 console.error("❌ Code exchange failed:", exchangeError);
                 console.error("❌ Error:", exchangeError.message);
-                console.error("❌ This likely means PKCE verifier is not in browser storage");
-                console.error("❌ Verifier is probably stored in the mobile app that initiated reset");
+                console.error("❌ Error code:", exchangeError.code);
                 
-                // Pass code to app - it will try to exchange but will likely fail
+                // If exchange fails due to missing verifier, pass code to app
+                // App will try to exchange but will likely fail with bad_code_verifier
                 queryParams.push("code=" + encodeURIComponent(params.code));
                 if (params.type) {
                   queryParams.push("type=" + encodeURIComponent(params.type));
                 } else {
                   queryParams.push("type=recovery");
                 }
-                console.log("⚠️ Passing code to app - app exchange will likely fail (bad_code_verifier)");
+                console.log("⚠️ Passing code to app - app exchange may fail (bad_code_verifier)");
               } else if (exchangeData && exchangeData.session) {
                 console.log("✅ Code exchanged successfully!");
                 queryParams.push("access_token=" + encodeURIComponent(exchangeData.session.access_token));
@@ -229,7 +296,7 @@
               }
             }
           } catch (e) {
-            console.error("❌ Error during code exchange:", e);
+            console.error("❌ Exception during code exchange:", e);
             // Fallback: pass code
             queryParams.push("code=" + encodeURIComponent(params.code));
             if (params.type) {
@@ -264,12 +331,14 @@
         }
 
         console.log("🔍 Final deep link:", deepLink);
+        console.log("🔍 ========================================");
 
         if (loadingEl) loadingEl.style.display = "none";
         if (openBtn) {
           openBtn.setAttribute("href", deepLink);
           openBtn.onclick = function (e) { 
             e.preventDefault(); 
+            console.log("🔗 Opening deep link:", deepLink);
             window.location.href = deepLink; 
           };
           openBtn.style.display = "inline-block";
@@ -278,7 +347,9 @@
         if (isMobile) {
           if (mobileMsg) mobileMsg.style.display = "block";
           if (deeplinkEl) deeplinkEl.textContent = "Deep link: " + deepLink;
+          // Quick redirect to app (reduced delay for better UX)
           setTimeout(function () { 
+            console.log("🔗 Auto-redirecting to app:", deepLink);
             window.location.href = deepLink; 
           }, 250);
         } else {
