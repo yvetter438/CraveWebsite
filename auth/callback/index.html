@@ -61,7 +61,9 @@
             return {
               search: search,
               hash: hash,
-              // Supabase auth params
+              // Supabase auth params - PKCE token (for recovery, signup, etc)
+              token: search.get("token") || hash.get("token"),
+              // Session tokens (if available)
               access_token: search.get("access_token") || hash.get("access_token"),
               refresh_token: search.get("refresh_token") || hash.get("refresh_token"),
               token_type: search.get("token_type") || hash.get("token_type"),
@@ -76,6 +78,7 @@
               hash: new URLSearchParams(),
               target: null,
               redirect_to: null,
+              token: null,
               access_token: null,
               refresh_token: null,
               token_type: null,
@@ -85,7 +88,12 @@
         }
 
         function determineTarget(params) {
-          // 1. If redirect_to is provided (from Supabase), use it
+          // Check recovery type FIRST (password reset)
+          if (params.type === "recovery") {
+            return "reset-password";
+          }
+
+          // If redirect_to is provided (from Supabase), use it
           if (params.redirect_to) {
             // If it's already a deep link, extract the path
             if (params.redirect_to.startsWith("crave://")) {
@@ -101,21 +109,15 @@
             try {
               var url = new URL(params.redirect_to);
               // For web redirects, we'll still route to login by default
-              // but handle recovery specially
             } catch (e) {}
           }
 
-          // 2. Handle recovery type (password reset)
-          if (params.type === "recovery") {
-            return "reset-password";
-          }
-
-          // 3. Use custom target if provided
+          // Use custom target if provided
           if (params.target) {
             return params.target;
           }
 
-          // 4. Default to login (including signup confirmation)
+          // Default to login (including signup confirmation)
           return "login";
         }
 
@@ -133,25 +135,45 @@
         // Determine the target screen
         var target = determineTarget(params);
 
-        // Build deep link with auth data if available
+        // Build deep link - start with target
         var deepLink = "crave://" + target;
         
-        // If we have auth tokens, encode them in the deep link
-        if (params.access_token) {
-          var authData = btoa(JSON.stringify({
-            access_token: params.access_token,
-            refresh_token: params.refresh_token,
-            token_type: params.token_type,
-            type: params.type
-          }));
-          deepLink = "crave://" + target + "?auth=" + encodeURIComponent(authData);
+        // Build query parameters as direct params (not base64 JSON)
+        var queryParams = [];
+        
+        // Add PKCE token if available (for password recovery, email verification, etc)
+        if (params.token) {
+          queryParams.push("token=" + encodeURIComponent(params.token));
         }
+        
+        // Add type if available
+        if (params.type) {
+          queryParams.push("type=" + encodeURIComponent(params.type));
+        }
+        
+        // Add session tokens if available (alternative auth flow)
+        if (params.access_token) {
+          queryParams.push("access_token=" + encodeURIComponent(params.access_token));
+        }
+        if (params.refresh_token) {
+          queryParams.push("refresh_token=" + encodeURIComponent(params.refresh_token));
+        }
+        
+        // Append query string if we have params
+        if (queryParams.length > 0) {
+          deepLink += "?" + queryParams.join("&");
+        }
+
+        console.log("Deep link:", deepLink); // For debugging
 
         // Show the appropriate message based on device
         if (loadingEl) loadingEl.style.display = "none";
         if (openBtn) {
           openBtn.setAttribute("href", deepLink);
-          openBtn.onclick = function (e) { e.preventDefault(); window.location.href = deepLink; };
+          openBtn.onclick = function (e) { 
+            e.preventDefault(); 
+            window.location.href = deepLink; 
+          };
           openBtn.style.display = "inline-block";
         }
 
@@ -160,7 +182,9 @@
           if (mobileMsg) mobileMsg.style.display = "block";
           if (deeplinkEl) deeplinkEl.textContent = "Deep link: " + deepLink;
           // Allow initial render, then attempt to open the app
-          setTimeout(function () { window.location.href = deepLink; }, 250);
+          setTimeout(function () { 
+            window.location.href = deepLink; 
+          }, 250);
         } else {
           // Desktop: show QR code
           if (desktopMsg) desktopMsg.style.display = "block";
