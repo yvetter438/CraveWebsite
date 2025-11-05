@@ -138,29 +138,37 @@
         }
 
         function determineTarget(params) {
-          // FIXED: Only route to reset-password if explicitly type=recovery
+          // CRITICAL: Only route to reset-password if explicitly type=recovery
           if (params.type === "recovery") {
+            console.log("🎯 Target: reset-password (type=recovery)");
             return "reset-password";
           }
           
-          // REMOVED: The problematic condition that assumed code without type = reset-password
-          // OLD CODE: if (params.code && !params.type) { return "reset-password"; }
+          // For signup confirmations (type=signup or type=email), don't specify a target
+          // Let the app's auth flow handle routing (onboarding or main app)
+          if (params.type === "signup" || params.type === "email") {
+            console.log("🎯 Target: (empty - signup/email confirmation, app will route)");
+            return "";
+          }
           
           // Handle custom redirect_to parameter
           if (params.redirect_to && params.redirect_to.startsWith("crave://")) {
             var path = params.redirect_to.replace(/^crave:\/\//, "").split("?")[0].split("#")[0];
             if (path && path.trim()) {
+              console.log("🎯 Target: " + path + " (from redirect_to)");
               return path;
             }
           }
           
           // Handle explicit target parameter
           if (params.target) {
+            console.log("🎯 Target: " + params.target + " (from target param)");
             return params.target;
           }
           
           // Default: Let app handle routing based on auth state
           // For signup confirmations, email changes, etc.
+          console.log("🎯 Target: (empty - no type specified, app will route)");
           return "";
         }
 
@@ -183,6 +191,28 @@
           redirect_to: params.redirect_to || "❌ MISSING",
           target: params.target || "❌ MISSING"
         });
+        
+        // CRITICAL WARNING: Check if type parameter is missing
+        if ((params.code || params.token) && !params.type) {
+          console.warn("⚠️ ========================================");
+          console.warn("⚠️ WARNING: 'type' parameter is MISSING!");
+          console.warn("⚠️ This will make it impossible to distinguish");
+          console.warn("⚠️ between signup confirmation and password reset.");
+          console.warn("⚠️ ");
+          console.warn("⚠️ Check your Supabase email templates!");
+          console.warn("⚠️ The URL should include type=signup or type=recovery");
+          console.warn("⚠️ ========================================");
+          
+          // Try to infer type from redirect_to if available
+          if (params.redirect_to && params.redirect_to.includes('reset')) {
+            console.log("💡 Inferring type=recovery from redirect_to");
+            params.type = "recovery";
+          } else {
+            console.log("💡 No type provided - app will assume signup");
+            // Don't set a type - let the app handle it as signup
+          }
+        }
+        
         console.log("🔍 ========================================");
 
         var ua = (navigator.userAgent || "").toLowerCase();
