@@ -21,6 +21,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* ~12.5% larger than browser default — scales all rem-based type */
+  font-size: 112.5%;
 }
 
 body {
@@ -68,6 +70,9 @@ body {
 }
 
 /* ---------- Desktop: fixed left column ---------- */
+/* Matches old Tailwind: px-12 lg:px-16 (this column shows at 1280+ → 64px sides),
+   space-y-6 (24px) between headline / desc / CTA, space-y-2 (8px) inside headline.
+   Brand type: Barlow Condensed font-bold (700); Crave text-8xl, sublines text-5xl + #FEFF48. */
 .home-fixed {
   width: 40%;
   height: 100%;
@@ -76,38 +81,38 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 3rem 3rem 3rem 4rem;
+  padding: 48px 64px;
   background: var(--bg2);
 }
 
 .home-fixed-inner {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 24px; /* space-y-6 — not affected by root font-size scale */
   max-width: 28rem;
 }
 
-.home-brand-lines h2 {
-  margin: 0;
-  line-height: 1.05;
-  font-weight: 800;
-  font-size: clamp(3.5rem, 6vw, 5rem);
+.home-brand-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* space-y-2 */
 }
 
-.home-fixed .home-brand-lines h2,
-.home-mobile-hero .home-brand-lines h2 {
+/* Desktop-only (narrow left column): text-7xl → md:text-8xl and text-4xl → md:text-5xl at md+ */
+.home-fixed .home-brand-crave {
+  margin: 0;
+  line-height: 1;
+  font-weight: 700;
+  font-size: 96px; /* text-8xl at lg+ */
   color: var(--text1);
 }
 
-.home-brand-lines .discover-line {
-  display: block;
-  font-size: clamp(2rem, 3.5vw, 3rem);
+.home-fixed .home-brand-sub {
+  margin: 0;
+  line-height: 1;
   font-weight: 700;
-  margin-top: 0.15em;
-}
-
-.home-fixed .home-brand-lines .discover-line {
-  color: var(--discover-yellow);
+  font-size: 48px; /* text-5xl */
+  color: #feff48;
 }
 
 .home-fixed-desc {
@@ -124,7 +129,6 @@ body {
 }
 
 .app-store-block {
-  padding-top: 0.5rem;
   width: 100%;
 }
 
@@ -369,13 +373,20 @@ body {
 }
 
 /* ---------- Mobile / tablet homepage ---------- */
+/* Matches: px-6 sm:px-12, inner py-12, space-y-6 / space-y-2; Crave text-6xl sm:text-7xl; sub text-3xl sm:text-4xl + #FFB300 */
 .home-mobile-hero {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 3rem 1.5rem;
+  padding: 0 24px;
   background: var(--bg2);
+}
+
+@media (min-width: 640px) {
+  .home-mobile-hero {
+    padding: 0 48px;
+  }
 }
 
 .home-mobile-hero-inner {
@@ -383,19 +394,41 @@ body {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 24px; /* space-y-6 */
+  padding-top: 48px;
+  padding-bottom: 48px; /* py-12 */
 }
 
 .home-mobile-hero .home-brand-lines {
   text-align: center;
 }
 
-.home-mobile-hero .home-brand-lines h2 {
-  font-size: clamp(3.25rem, 12vw, 4.5rem);
+.home-mobile-hero .home-brand-crave {
+  margin: 0;
+  line-height: 1;
+  font-weight: 700;
+  font-size: 60px; /* text-6xl */
+  color: var(--text1);
 }
 
-.home-mobile-hero .home-brand-lines .discover-line {
-  color: var(--discover-amber);
+@media (min-width: 640px) {
+  .home-mobile-hero .home-brand-crave {
+    font-size: 72px; /* text-7xl */
+  }
+}
+
+.home-mobile-hero .home-brand-sub {
+  margin: 0;
+  line-height: 1;
+  font-weight: 700;
+  font-size: 30px; /* text-3xl */
+  color: #ffb300;
+}
+
+@media (min-width: 640px) {
+  .home-mobile-hero .home-brand-sub {
+    font-size: 36px; /* text-4xl */
+  }
 }
 
 .home-mobile-hero .home-fixed-desc {
