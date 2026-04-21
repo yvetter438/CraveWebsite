@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crave - Discover, Eat, Share</title>
+  <meta name="description" content="Your food-first video app. Real videos. Real food.">
+  <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/crave-redesign.css">
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-022JD0N4M0"></script>
   <script>
@@ -9,254 +19,285 @@
     gtag('js', new Date());
     gtag('config', 'G-022JD0N4M0');
   </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crave - Your Food-First Video App</title>
-  <link rel="icon" type="image/png" href="webassets/brand/CraveLogo.png">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-  <!-- Navigation -->
-  <header class="topnav">
-    <div class="container">
-      <div class="nav-left">
-        <img src="webassets/brand/CraveLogo.png" alt="Crave" class="nav-logo">
-        <span class="nav-brand">Crave</span>
-      </div>
-      <div class="nav-right">
-        <a href="https://apps.apple.com/us/app/crave-discover-eat-share/id6740149234" class="download-btn apple-btn">
-          <i class="fab fa-apple"></i>
-          <div class="btn-text">
-            <span class="btn-label">Download on the</span>
-            <span class="btn-store">App Store</span>
+  <!-- Desktop: 40% fixed + 60% scroll -->
+  <div class="home-desktop">
+    <aside class="home-fixed" aria-label="Crave introduction">
+      <div class="home-fixed-inner">
+        <div class="home-brand-lines">
+          <h2>Crave</h2>
+          <span class="discover-line">Discover</span>
+          <span class="discover-line">Eat</span>
+          <span class="discover-line">Share</span>
+        </div>
+        <p class="home-fixed-desc">Sharing Our World's Cuisine Through Video</p>
+        <div class="app-store-block">
+          <p class="app-store-label">Download Now</p>
+          <a class="app-store-btn" href="https://crave.onelink.me/7FzW/r6ggd7ej" target="_blank" rel="noopener noreferrer">
+            <div class="app-store-btn-inner">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              <span class="app-store-btn-text">App Store</span>
+            </div>
+          </a>
+          <div class="home-inline-links">
+            <a href="pages/privacy-policy.html">Privacy</a>
+            <a href="pages/terms-of-service.html">Terms of Service</a>
           </div>
-        </a>
-        <div class="mobile-menu-toggle">
-          <i class="fas fa-bars"></i>
         </div>
       </div>
-    </div>
-  </header>
+    </aside>
 
-  <!-- Hero Section -->
-  <main class="hero">
-    <div class="container">
-      <div class="hero-content">
-        <div class="hero-text">
-          <h1 class="hero-title">Your <span class="highlight">food-first</span> video app</h1>
-          <p class="hero-tagline">Real videos. Real food.</p>
-          <p class="hero-description">Skip the staged photos and paid ads. See what's actually good nearby through authentic food videos from people you trust.</p>
-          <div class="hero-cta">
-            <a href="https://apps.apple.com/us/app/crave-discover-eat-share/id6740149234" class="download-btn apple-btn large">
-              <i class="fab fa-apple"></i>
-              <div class="btn-text">
-                <span class="btn-label">Download on the</span>
-                <span class="btn-store">App Store</span>
-              </div>
+    <div class="home-scroll">
+      <div class="home-sticky-brand">
+        <img src="images/logo.png" width="120" height="120" alt="Crave">
+        <h2>Crave</h2>
+      </div>
+
+      <section class="hero-section">
+        <div class="hero-section-inner">
+          <div class="hero-copy">
+            <h2>Your food-first video app</h2>
+            <h3>Real videos. Real food.</h3>
+            <p>Explore mouthwatering food videos, discover new recipes, and share your culinary adventures with a community of food lovers.</p>
+          </div>
+          <div class="hero-media">
+            <div class="mockup-container">
+              <video src="images/hero-mockups/hero-1-app-mockup.mov" autoplay loop muted playsinline aria-label="Crave app screen recording"></video>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="hero-section">
+        <div class="hero-section-inner reverse">
+          <div class="hero-copy">
+            <h2>Cravin Something?</h2>
+            <h3>Find It in Seconds</h3>
+            <p>Swipe through endless food content. From viral recipes to restaurant reviews, discover what you're craving right now.</p>
+          </div>
+          <div class="hero-media">
+            <div class="mockup-container">
+              <img src="images/hero-mockups/hero-2-app-mockup.png" alt="Crave app preview">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="hero-section">
+        <div class="hero-section-inner">
+          <div class="hero-copy">
+            <h2>Connect With Foodies</h2>
+            <h3>Share, Chat &amp; Discover Together</h3>
+            <p>Chat with friends about food, share your favorite finds, and build your community of fellow food enthusiasts.</p>
+          </div>
+          <div class="hero-media">
+            <div class="mockup-container">
+              <img src="images/hero-mockups/hero-3-app-mockup.png" alt="Crave app preview">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="hero-section">
+        <div class="hero-section-inner reverse">
+          <div class="hero-copy">
+            <h2>Trusted by Top Restaurants</h2>
+            <h3>Join Dozens of Food Businesses</h3>
+            <p>From local favorites to hidden gems, restaurants are using Crave to reach dozens of hungry customers.</p>
+          </div>
+          <div class="hero-media">
+            <div class="mockup-container tiles-grid" role="list">
+              <div class="tile-card" role="listitem"><p>Thai 2 Go</p></div>
+              <div class="tile-card" role="listitem"><p>Chuan House</p></div>
+              <div class="tile-card" role="listitem"><p>Solo Noodle</p></div>
+              <div class="tile-card" role="listitem"><p>Angkor Wok</p></div>
+              <div class="tile-card" role="listitem"><p>Pho Shizzle</p></div>
+              <div class="tile-card" role="listitem"><p>Sweet Alchemy</p></div>
+              <div class="tile-card" role="listitem"><p>Shake and Stack</p></div>
+              <div class="tile-card" role="listitem"><p>Toasted Seattle</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="hero-section">
+        <div class="hero-section-inner">
+          <div class="hero-copy">
+            <h2>Restaurant Partners</h2>
+            <h3>Grow Your Business with Crave</h3>
+            <p>Showcase your dishes through video, reach new customers, and leverage our platform to grow your restaurant's presence.</p>
+          </div>
+          <div class="hero-media">
+            <div class="mockup-container">
+              <a class="btn-learn-more" href="pages/support.html">Learn More</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <div class="site-footer-inner">
+          <div class="site-footer-social">
+            <a href="https://www.linkedin.com/company/cravesocial/?viewAsMember=true" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+              <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/theinternetishungry/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="#" aria-label="X (coming soon)">
+              <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </a>
           </div>
+          <nav class="site-footer-links" aria-label="Footer">
+            <a href="pages/privacy-policy.html">Privacy Policy</a>
+            <a href="pages/terms-of-service.html">Terms of Service</a>
+            <a href="pages/community-guidelines.html">Community Guidelines</a>
+          </nav>
+          <p class="site-footer-copy">&copy; 2026 Crave. All rights reserved.</p>
         </div>
-        <div class="hero-image">
-          <img src="webassets/brand/CraveLoginLeft.png" alt="Crave App Screenshot" class="app-screenshot">
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- How It Works -->
-  <section class="how-it-works">
-    <div class="container">
-      <h2 class="section-title">What Are You Craving Today?</h2>
-      <p class="section-subtitle">In three simple steps, go from hungry to happy.</p>
-      <div class="steps">
-        <div class="step">
-          <div class="step-icon"><i class="fas fa-compass"></i></div>
-          <h3>Discover</h3>
-          <p>Open Crave and explore real food videos from local restaurants.</p>
-        </div>
-        <div class="step">
-          <div class="step-icon"><i class="fas fa-utensils"></i></div>
-          <h3>Decide</h3>
-          <p>See dishes in motion, hear reactions, and save spots that actually look good.</p>
-        </div>
-        <div class="step">
-          <div class="step-icon"><i class="fas fa-share-alt"></i></div>
-          <h3>Share</h3>
-          <p>Post your own food moments to help others find their next favorite bite.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Social Proof -->
-  <section class="social-proof">
-    <div class="container">
-      <h2 class="section-title">Featured Partners</h2>
-      <p class="section-subtitle">Discover authentic food videos from amazing U-District restaurants</p>
-      <div class="restaurant-grid">
-        <div class="restaurant-card">
-          <h3>Thai 2 Go</h3>
-          <p>Authentic Thai Street Food</p>
-        </div>
-        <div class="restaurant-card">
-          <h3>Chuan House</h3>
-          <p>Sichuan Cuisine</p>
-        </div>
-        <div class="restaurant-card">
-          <h3>Solo Noodle</h3>
-          <p>Chinese Noodles</p>
-        </div>
-        <div class="restaurant-card">
-          <h3>Angkor Wok</h3>
-          <p>Cambodian Restaurant</p>
-        </div>
-        <div class="restaurant-card">
-          <h3>PhoShizzle</h3>
-          <p>Vietnamese Cuisine</p>
-        </div>
-        <div class="restaurant-card">
-          <h3>Sweet Alchemy</h3>
-          <p>Artisan Ice Cream</p>
-        </div>
-        <div class="restaurant-card">
-          <h3>Shake and Stack</h3>
-          <p>Premium Burgers</p>
-        </div>
-        <div class="restaurant-card">
-          <h3>Toasted Seattle</h3>
-          <p>Mediterranean Bagels</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- For Restaurants -->
-  <section class="for-restaurants">
-    <div class="container">
-      <h2 class="section-title">Built for restaurants too</h2>
-      <p class="section-subtitle">Earn trust with authentic video, reach locals, and drive visits when it matters.</p>
-      <div class="benefits">
-        <div class="benefit-card">
-          <i class="fas fa-bullhorn"></i>
-          <h3>Authentic reach</h3>
-          <p>Real video from real people—no stock photos or tired promo shots.</p>
-        </div>
-        <div class="benefit-card">
-          <i class="fas fa-chart-line"></i>
-          <h3>Local intent</h3>
-          <p>Show up in front of people looking for their next meal right now.</p>
-        </div>
-        <div class="benefit-card">
-          <i class="fas fa-heart"></i>
-          <h3>Community-first</h3>
-          <p>Build loyalty through creators and regulars who love your food.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Final CTA -->
-  <section class="final-cta">
-    <div class="container">
-      <h2 class="cta-title">Ready to Share Your Food Story?</h2>
-      <p class="cta-description">Download Crave today and join the community that's revolutionizing how we discover and share food experiences.</p>
-      <div class="cta-buttons">
-        <a href="https://apps.apple.com/us/app/crave-discover-eat-share/id6740149234" class="download-btn apple-btn large">
-          <i class="fab fa-apple"></i>
-          <div class="btn-text">
-            <span class="btn-label">Download on the</span>
-            <span class="btn-store">App Store</span>
-          </div>
-        </a>
-      </div>
-      <div class="cta-features">
-        <div class="feature-item">
-          <i class="fas fa-video"></i>
-          <span>Share Food Videos</span>
-        </div>
-        <div class="feature-item">
-          <i class="fas fa-search"></i>
-          <span>Discover New Places</span>
-        </div>
-        <div class="feature-item">
-          <i class="fas fa-users"></i>
-          <span>Connect with Foodies</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <div class="footer-container">
-      <div class="footer-left">
-        <a href="https://apps.apple.com/us/app/crave-discover-eat-share/id6740149234" title="Download on App Store"><i class="fab fa-apple"></i></a>
-      </div>
-      <div class="footer-center">
-        <a href="https://www.instagram.com/cravesocial.app" title="Follow on Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.linkedin.com/company/cravesocial/" title="Connect on LinkedIn"><i class="fab fa-linkedin"></i></a>
-      </div>
-      <div class="footer-right">
-        <a href="pages/features.html">Features</a>
-        <a href="pages/about.html">About</a>
-        <a href="pages/support.html">Support</a>
-        <a href="pages/privacy-policy.html">Privacy</a>
-        <a href="pages/community-guidelines.html">Guidelines</a>
-        <a href="pages/terms-of-service.html">Terms</a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Mobile Menu -->
-  <div class="mobile-menu">
-    <div class="mobile-menu-content">
-      <div class="mobile-menu-header">
-        <span>Menu</span>
-        <button class="mobile-menu-close"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="mobile-menu-section">
-        <h3>Download</h3>
-        <a href="https://apps.apple.com/us/app/crave-discover-eat-share/id6740149234"><i class="fab fa-apple"></i> App Store</a>
-      </div>
-      <div class="mobile-menu-section">
-        <h3>Follow Us</h3>
-        <a href="https://www.instagram.com/cravesocial.app"><i class="fab fa-instagram"></i> Instagram</a>
-        <a href="https://www.linkedin.com/company/cravesocial/"><i class="fab fa-linkedin"></i> LinkedIn</a>
-      </div>
-      <div class="mobile-menu-section">
-        <h3>Pages</h3>
-        <a href="index.html">Home</a>
-        <a href="pages/features.html">Features</a>
-        <a href="pages/about.html">About</a>
-        <a href="pages/support.html">Support</a>
-        <a href="pages/privacy-policy.html">Privacy Policy</a>
-        <a href="pages/community-guidelines.html">Community Guidelines</a>
-        <a href="pages/terms-of-service.html">Terms of Service</a>
-      </div>
+      </footer>
     </div>
   </div>
 
+  <!-- Mobile & tablet -->
+  <div class="home-mobile">
+    <section class="home-mobile-hero">
+      <div class="home-mobile-hero-inner">
+        <div class="home-brand-lines">
+          <h2>Crave</h2>
+          <span class="discover-line">Discover</span>
+          <span class="discover-line">Eat</span>
+          <span class="discover-line">Share</span>
+        </div>
+        <p class="home-fixed-desc">Sharing Our World's Cuisine Through Video</p>
+        <div class="app-store-block">
+          <p class="app-store-label">Download Now</p>
+          <a class="app-store-btn" href="https://crave.onelink.me/7FzW/r6ggd7ej" target="_blank" rel="noopener noreferrer">
+            <div class="app-store-btn-inner">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              <span class="app-store-btn-text">App Store</span>
+            </div>
+          </a>
+          <div class="home-inline-links" style="justify-content:center;">
+            <a href="pages/privacy-policy.html">Privacy</a>
+            <a href="pages/terms-of-service.html">Terms of Service</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="home-mobile-sticky">
+      <img src="images/logo.png" width="96" height="96" alt="Crave">
+      <h2>Crave</h2>
+    </div>
+
+    <section class="hero-mobile-section">
+      <div class="hero-mobile-inner">
+        <h2>Your food-first video app</h2>
+        <h3>Real videos. Real food.</h3>
+        <p>Explore mouthwatering food videos, discover new recipes, and share your culinary adventures with a community of food lovers.</p>
+        <div class="mockup-container">
+          <video src="images/hero-mockups/hero-1-app-mockup.mov" autoplay loop muted playsinline aria-label="Crave app screen recording"></video>
+        </div>
+      </div>
+    </section>
+
+    <section class="hero-mobile-section">
+      <div class="hero-mobile-inner">
+        <h2>Cravin Something?</h2>
+        <h3>Find It in Seconds</h3>
+        <p>Swipe through endless food content. From viral recipes to restaurant reviews, discover what you're craving right now.</p>
+        <div class="mockup-container">
+          <img src="images/hero-mockups/hero-2-app-mockup.png" alt="Crave app preview">
+        </div>
+      </div>
+    </section>
+
+    <section class="hero-mobile-section">
+      <div class="hero-mobile-inner">
+        <h2>Connect With Foodies</h2>
+        <h3>Share, Chat &amp; Discover Together</h3>
+        <p>Chat with friends about food, share your favorite finds, and build your community of fellow food enthusiasts.</p>
+        <div class="mockup-container">
+          <img src="images/hero-mockups/hero-3-app-mockup.png" alt="Crave app preview">
+        </div>
+      </div>
+    </section>
+
+    <section class="hero-mobile-section">
+      <div class="hero-mobile-inner">
+        <h2>Trusted by Top Restaurants</h2>
+        <h3>Join Dozens of Food Businesses</h3>
+        <p>From local favorites to hidden gems, restaurants are using Crave to reach dozens of hungry customers.</p>
+        <div class="mockup-container tiles-grid" role="list">
+          <div class="tile-card" role="listitem"><p>Thai 2 Go</p></div>
+          <div class="tile-card" role="listitem"><p>Chuan House</p></div>
+          <div class="tile-card" role="listitem"><p>Solo Noodle</p></div>
+          <div class="tile-card" role="listitem"><p>Angkor Wok</p></div>
+          <div class="tile-card" role="listitem"><p>Pho Shizzle</p></div>
+          <div class="tile-card" role="listitem"><p>Sweet Alchemy</p></div>
+          <div class="tile-card" role="listitem"><p>Shake and Stack</p></div>
+          <div class="tile-card" role="listitem"><p>Toasted Seattle</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="hero-mobile-section">
+      <div class="hero-mobile-inner">
+        <h2>Restaurant Partners</h2>
+        <h3>Grow Your Business with Crave</h3>
+        <p>Showcase your dishes through video, reach new customers, and leverage our platform to grow your restaurant's presence.</p>
+        <div class="mockup-container">
+          <a class="btn-learn-more btn-learn-more--mobile" href="pages/support.html">Learn More</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div class="site-footer-social">
+          <a href="https://www.linkedin.com/company/cravesocial/?viewAsMember=true" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/theinternetishungry/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+          <a href="#" aria-label="X (coming soon)">
+            <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+        </div>
+        <nav class="site-footer-links" aria-label="Footer">
+          <a href="pages/privacy-policy.html">Privacy Policy</a>
+          <a href="pages/terms-of-service.html">Terms of Service</a>
+          <a href="pages/community-guidelines.html">Community Guidelines</a>
+        </nav>
+        <p class="site-footer-copy">&copy; 2026 Crave. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const menuToggle = document.querySelector('.mobile-menu-toggle');
-      const mobileMenu = document.querySelector('.mobile-menu');
-      const menuClose = document.querySelector('.mobile-menu-close');
-      
-      menuToggle.addEventListener('click', function() {
-        mobileMenu.classList.add('active');
-      });
-      
-      menuClose.addEventListener('click', function() {
-        mobileMenu.classList.remove('active');
-      });
-      
-      mobileMenu.addEventListener('click', function(e) {
-        if (e.target === mobileMenu) {
-          mobileMenu.classList.remove('active');
-        }
-      });
-    });
+    (function () {
+      var nodes = document.querySelectorAll('.mockup-container');
+      if (!('IntersectionObserver' in window) || !nodes.length) {
+        nodes.forEach(function (el) { el.classList.add('animate-in'); });
+        return;
+      }
+      var obs = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) entry.target.classList.add('animate-in');
+          });
+        },
+        { threshold: 0.2 }
+      );
+      nodes.forEach(function (el) { obs.observe(el); });
+    })();
   </script>
 </body>
 </html>
